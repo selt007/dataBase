@@ -59,8 +59,8 @@ namespace DataBaseUsers
                 {
                     if (!col1[i].Checked)
                     {
-                        //File.WriteAllText(arrNameFile[i], "");
-                        //File.WriteAllText(arrNameFile[i], str2M3U);
+                        File.WriteAllText(arrNameFile[i], "");
+                        File.WriteAllText(arrNameFile[i], str2M3U);
                         if (xe.Element("id").Value == idName)
                         {
                             xe.Element("chk").Value = "false";
@@ -69,8 +69,8 @@ namespace DataBaseUsers
                     }
                     else
                     {
-                        //File.WriteAllText(arrNameFile[i], "");
-                        //File.WriteAllText(arrNameFile[i], str1M3U);
+                        File.WriteAllText(arrNameFile[i], "");
+                        File.WriteAllText(arrNameFile[i], str1M3U);
                         if (xe.Element("id").Value == idName)
                         {
                             xe.Element("chk").Value = "true";
