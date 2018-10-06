@@ -10,26 +10,37 @@ namespace DataBaseUsers
     public partial class MainForm : Form
     {
         static string pathUsers = "users";
-        static int countUsers = Directory.GetFiles(pathUsers).Length - 2;
+        static int countUsers = Directory.GetFiles(pathUsers).Length - 3;
 
         Panel[] rows = new Panel[countUsers];
         DateTimePicker[] col3 = new DateTimePicker[countUsers];
         Label[] col2 = new Label[countUsers];
         CheckBox[] col1 = new CheckBox[countUsers];
-        string[] arrNameFile = Directory.GetFiles(pathUsers);
+        string[] arrNameFile;
 
         public MainForm()
         {
             InitializeComponent();
+            StartPath();
+            arrNameFile = Directory.GetFiles(pathUsers);
             textBoxSearch.SetWatermark("Начните вводить ID для поиска...");
 
-            if (!File.Exists("users.xml"))
+            if (!File.Exists(pathUsers + "\\users.xml"))
             {
-                File.Create("users.xml").Close();
-                File.WriteAllText("users.xml", "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<users>\n</users>");
+                File.Create(pathUsers + "\\users.xml").Close();
+                File.WriteAllText(pathUsers + "\\users.xml", "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<users>\n</users>");
             }
-
             LoadUsers();
+        }
+
+        void StartPath()
+        {
+            FolderBrowserDialog folder = new FolderBrowserDialog();
+            folder.ShowNewFolderButton = false;
+
+            if (folder.ShowDialog() == DialogResult.OK)
+                pathUsers = folder.SelectedPath;
+            else Application.Exit();
         }
 
         private void buttonUpdate_Click(object sender, EventArgs e)
@@ -37,37 +48,37 @@ namespace DataBaseUsers
             string str2M3U = File.ReadAllText($"{pathUsers}//2.M3U");
             string str1M3U = File.ReadAllText($"{pathUsers}//1.M3U");
 
-            XDocument xdoc = XDocument.Load("users.xml");
+            XDocument xdoc = XDocument.Load(pathUsers + "\\users.xml");
             XElement root = xdoc.Element("users");
 
             for (int i = 2; i < rows.Length; i++)
             {
-                if (!col1[i].Checked)
+                string idName = arrNameFile[i].Replace(".M3U", "").Replace("users\\", "");
+
+                foreach (XElement xe in root.Elements("user").ToList())
                 {
-                    //File.WriteAllText(arrNameFile[i], "");
-                    //File.WriteAllText(arrNameFile[i], str2M3U);
-                    foreach (XElement xe in root.Elements("user").ToList())
+                    if (!col1[i].Checked)
                     {
-                        if (xe.Element("id").Value == "users\\" + arrNameFile[i].Replace(".M3U", ""))
+                        //File.WriteAllText(arrNameFile[i], "");
+                        //File.WriteAllText(arrNameFile[i], str2M3U);
+                        if (xe.Element("id").Value == idName)
+                        {
+                            xe.Element("chk").Value = "false";
+                            //xe.Element("date").Value = col3[i - 2].Text;
+                        }
+                    }
+                    else
+                    {
+                        //File.WriteAllText(arrNameFile[i], "");
+                        //File.WriteAllText(arrNameFile[i], str1M3U);
+                        if (xe.Element("id").Value == idName)
                         {
                             xe.Element("chk").Value = "true";
                             //xe.Element("date").Value = col3[i - 2].Text;
                         }
                     }
                 }
-                else
-                {
-                    //File.WriteAllText(arrNameFile[i], "");
-                    //File.WriteAllText(arrNameFile[i], str1M3U);
-                    foreach (XElement xe in root.Elements("user").ToList())
-                    {
-                        if (xe.Element("id").Value == "users\\" + arrNameFile[i].Replace(".M3U", ""))
-                        {
-                            xe.Element("chk").Value = "false";
-                            //xe.Element("date").Value = col3[i - 2].Text;
-                        }
-                    }
-                }
+                xdoc.Save(pathUsers + "\\users.xml");
             }
         }
 
@@ -83,7 +94,7 @@ namespace DataBaseUsers
             string date = string.Empty, ID = string.Empty;
             int i = 0;
             
-            XDocument xdoc = XDocument.Load("users.xml");
+            XDocument xdoc = XDocument.Load(pathUsers + "\\users.xml");
             try
             {
                 foreach (XElement user in xdoc.Element("users").Elements("user"))
@@ -142,7 +153,7 @@ namespace DataBaseUsers
         void AddInXml(string name)
         {
             XmlDocument xDoc = new XmlDocument();
-            xDoc.Load("users.xml");
+            xDoc.Load(pathUsers + "\\users.xml");
             XmlElement xRoot = xDoc.DocumentElement;
 
             XmlElement user = xDoc.CreateElement("user");
@@ -185,7 +196,7 @@ namespace DataBaseUsers
                 user.AppendChild(_date);
 
                 xRoot.AppendChild(user);
-                xDoc.Save("users.xml");
+                xDoc.Save(pathUsers + "\\users.xml");
             }
             CreateNewFile(textBoxAddID.Text);
         }
