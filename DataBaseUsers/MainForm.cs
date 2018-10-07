@@ -9,7 +9,7 @@ namespace DataBaseUsers
 {
     public partial class MainForm : Form
     {
-        static string pathUsers = "users";
+        static string pathUsers = "users", str2M3U, str1M3U;
         static int countUsers = Directory.GetFiles(pathUsers).Length - 3;
 
         Panel[] rows = new Panel[countUsers];
@@ -21,7 +21,7 @@ namespace DataBaseUsers
         public MainForm()
         {
             InitializeComponent();
-            StartPath();
+            //StartPath();
             arrNameFile = Directory.GetFiles(pathUsers);
             textBoxSearch.SetWatermark("Начните вводить ID для поиска...");
 
@@ -30,7 +30,19 @@ namespace DataBaseUsers
                 File.Create(pathUsers + "\\users.xml").Close();
                 File.WriteAllText(pathUsers + "\\users.xml", "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<users>\n</users>");
             }
-            LoadUsers();
+            if (!File.Exists(pathUsers + "\\2.M3U"))
+            {
+                File.Create(pathUsers + "\\2.M3U").Close();
+                File.WriteAllText(pathUsers + "\\2.M3U", TextBoxWatermarkExtensionMethod.m3u2);
+            }
+            if (!File.Exists(pathUsers + "\\1.M3U"))
+            {
+                File.Create(pathUsers + "\\1.M3U").Close();
+                File.WriteAllText(pathUsers + "\\1.M3U", TextBoxWatermarkExtensionMethod.m3u1);
+            }
+            str2M3U = File.ReadAllText($"{pathUsers}//2.M3U");
+            str1M3U = File.ReadAllText($"{pathUsers}//1.M3U");
+            LoadUsers();//DateTime.Now <= Convert.ToDateTime(xe.Element("date").Value)
         }
 
         void StartPath()
@@ -45,9 +57,6 @@ namespace DataBaseUsers
 
         private void buttonUpdate_Click(object sender, EventArgs e)
         {
-            string str2M3U = File.ReadAllText($"{pathUsers}//2.M3U");
-            string str1M3U = File.ReadAllText($"{pathUsers}//1.M3U");
-
             XDocument xdoc = XDocument.Load(pathUsers + "\\users.xml");
             XElement root = xdoc.Element("users");
 
@@ -64,7 +73,7 @@ namespace DataBaseUsers
                         if (xe.Element("id").Value == idName)
                         {
                             xe.Element("chk").Value = "false";
-                            //xe.Element("date").Value = col3[i - 2].Text;
+                            xe.Element("date").Value = col3[i].Text;
                         }
                     }
                     else
@@ -74,7 +83,7 @@ namespace DataBaseUsers
                         if (xe.Element("id").Value == idName)
                         {
                             xe.Element("chk").Value = "true";
-                            //xe.Element("date").Value = col3[i - 2].Text;
+                            xe.Element("date").Value = col3[i].Text;
                         }
                     }
                 }
@@ -102,42 +111,79 @@ namespace DataBaseUsers
                     XElement xChk = user.Element("chk");
                     XElement xID = user.Element("id");
                     XElement xDate = user.Element("date");
-                        
+
                     if (xChk.Value == "true")
                         chk = true;
                     else chk = false;
                     ID = xID.Value;
                     date = xDate.Value;
 
-                    rows[i] = new Panel();
-                    rows[i].Location = new System.Drawing.Point(0, i * 22);
-                    rows[i].Name = "row" + i.ToString();
-                    rows[i].Size = new System.Drawing.Size(panelData.Width, 22);
-                    rows[i].BorderStyle = BorderStyle.FixedSingle;
+                    #region Необходимо продумать
+                    if (ID.Contains(textBoxSearch.Text) && textBoxSearch.Text != string.Empty)
+                    {
+                        rows[i] = new Panel();
+                        rows[i].Location = new System.Drawing.Point(0, i * 22);
+                        rows[i].Name = "row" + i.ToString();
+                        rows[i].Size = new System.Drawing.Size(panelData.Width, 22);
+                        rows[i].BorderStyle = BorderStyle.FixedSingle;
 
-                    col3[i] = new DateTimePicker();
-                    col3[i].Location = new System.Drawing.Point(panelData.Width - 131, 0);
-                    col3[i].Name = "3column" + i.ToString();
-                    col3[i].Size = new System.Drawing.Size(130, 28);
-                    col3[i].Text = date;
+                        col3[i] = new DateTimePicker();
+                        col3[i].Location = new System.Drawing.Point(panelData.Width - 131, 0);
+                        col3[i].Name = "3column" + i.ToString();
+                        col3[i].Size = new System.Drawing.Size(130, 28);
+                        col3[i].Text = date;
 
-                    col2[i] = new Label();
-                    col2[i].Location = new System.Drawing.Point(30, 3);
-                    col2[i].Name = "2column" + i.ToString();
-                    col2[i].Text = ID;
-                    col2[i].Size = new System.Drawing.Size(panelData.Width - 167, 22);
+                        col2[i] = new Label();
+                        col2[i].Location = new System.Drawing.Point(30, 3);
+                        col2[i].Name = "2column" + i.ToString();
+                        col2[i].Text = ID;
+                        col2[i].Size = new System.Drawing.Size(panelData.Width - 167, 22);
 
-                    col1[i] = new CheckBox();
-                    col1[i].Location = new System.Drawing.Point(2, 0);
-                    col1[i].Name = "1column" + i.ToString();
-                    col1[i].Size = new System.Drawing.Size(35, 20);
-                    col1[i].Checked = chk;
+                        col1[i] = new CheckBox();
+                        col1[i].Location = new System.Drawing.Point(2, 0);
+                        col1[i].Name = "1column" + i.ToString();
+                        col1[i].Size = new System.Drawing.Size(35, 20);
+                        col1[i].Checked = chk;
 
-                    rows[i].Controls.Add(col3[i]);
-                    rows[i].Controls.Add(col2[i]);
-                    rows[i].Controls.Add(col1[i]);
-                    panelData.Controls.Add(rows[i]);
-                    i++;
+                        rows[i].Controls.Add(col3[i]);
+                        rows[i].Controls.Add(col2[i]);
+                        rows[i].Controls.Add(col1[i]);
+                        panelData.Controls.Add(rows[i]);
+                        i++;
+                    }
+                    else if (textBoxSearch.Text == string.Empty)
+                    {
+                        rows[i] = new Panel();
+                        rows[i].Location = new System.Drawing.Point(0, i * 22);
+                        rows[i].Name = "row" + i.ToString();
+                        rows[i].Size = new System.Drawing.Size(panelData.Width, 22);
+                        rows[i].BorderStyle = BorderStyle.FixedSingle;
+
+                        col3[i] = new DateTimePicker();
+                        col3[i].Location = new System.Drawing.Point(panelData.Width - 131, 0);
+                        col3[i].Name = "3column" + i.ToString();
+                        col3[i].Size = new System.Drawing.Size(130, 28);
+                        col3[i].Text = date;
+
+                        col2[i] = new Label();
+                        col2[i].Location = new System.Drawing.Point(30, 3);
+                        col2[i].Name = "2column" + i.ToString();
+                        col2[i].Text = ID;
+                        col2[i].Size = new System.Drawing.Size(panelData.Width - 167, 22);
+
+                        col1[i] = new CheckBox();
+                        col1[i].Location = new System.Drawing.Point(2, 0);
+                        col1[i].Name = "1column" + i.ToString();
+                        col1[i].Size = new System.Drawing.Size(35, 20);
+                        col1[i].Checked = chk;
+
+                        rows[i].Controls.Add(col3[i]);
+                        rows[i].Controls.Add(col2[i]);
+                        rows[i].Controls.Add(col1[i]);
+                        panelData.Controls.Add(rows[i]);
+                        i++;
+                    }
+                    #endregion
                 }
             }
             catch(Exception ex)
@@ -148,6 +194,12 @@ namespace DataBaseUsers
                                     "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
+        }
+
+        private void textBoxSearch_TextChanged(object sender, EventArgs e)
+        {
+            panelData.Controls.Clear();
+            LoadUsers();
         }
 
         void AddInXml(string name)
@@ -164,7 +216,7 @@ namespace DataBaseUsers
 
             XmlText chk = xDoc.CreateTextNode("false");
             XmlText id = xDoc.CreateTextNode(name);
-            XmlText date = xDoc.CreateTextNode(DateTime.Now.Date.ToString());
+            XmlText date = xDoc.CreateTextNode(DateTime.Now.Date.ToString("D"));
 
             if (name == "ID-")
             {
@@ -209,11 +261,6 @@ namespace DataBaseUsers
                 string str2M3U = File.ReadAllText($"{pathUsers}//2.M3U");
                 File.WriteAllText($"{pathUsers}//{name}.M3U", str2M3U);
             }
-        }
-
-        private void textBoxSearch_TextChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

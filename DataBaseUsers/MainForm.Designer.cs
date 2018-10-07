@@ -38,12 +38,12 @@
             // buttonUpdate
             // 
             this.buttonUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonUpdate.BackColor = System.Drawing.Color.OldLace;
+            this.buttonUpdate.BackColor = System.Drawing.Color.Honeydew;
             this.buttonUpdate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonUpdate.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonUpdate.Location = new System.Drawing.Point(266, 12);
+            this.buttonUpdate.Location = new System.Drawing.Point(253, 12);
             this.buttonUpdate.Name = "buttonUpdate";
-            this.buttonUpdate.Size = new System.Drawing.Size(101, 54);
+            this.buttonUpdate.Size = new System.Drawing.Size(114, 60);
             this.buttonUpdate.TabIndex = 0;
             this.buttonUpdate.Text = "Обновить файлы";
             this.buttonUpdate.UseVisualStyleBackColor = false;
@@ -54,18 +54,18 @@
             this.textBoxSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxSearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxSearch.Location = new System.Drawing.Point(12, 12);
+            this.textBoxSearch.Location = new System.Drawing.Point(12, 14);
             this.textBoxSearch.Name = "textBoxSearch";
-            this.textBoxSearch.Size = new System.Drawing.Size(248, 21);
+            this.textBoxSearch.Size = new System.Drawing.Size(235, 21);
             this.textBoxSearch.TabIndex = 1;
             this.textBoxSearch.TextChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
             // 
             // buttonAddID
             // 
-            this.buttonAddID.BackColor = System.Drawing.Color.Gainsboro;
+            this.buttonAddID.BackColor = System.Drawing.Color.LightCyan;
             this.buttonAddID.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonAddID.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.buttonAddID.Location = new System.Drawing.Point(155, 39);
+            this.buttonAddID.Location = new System.Drawing.Point(142, 45);
             this.buttonAddID.Name = "buttonAddID";
             this.buttonAddID.Size = new System.Drawing.Size(105, 27);
             this.buttonAddID.TabIndex = 3;
@@ -76,18 +76,18 @@
             // panelData
             // 
             this.panelData.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelData.Location = new System.Drawing.Point(12, 72);
+            this.panelData.Location = new System.Drawing.Point(12, 78);
             this.panelData.Name = "panelData";
-            this.panelData.Size = new System.Drawing.Size(355, 269);
+            this.panelData.Size = new System.Drawing.Size(355, 263);
             this.panelData.TabIndex = 4;
             // 
             // textBoxAddID
             // 
-            this.textBoxAddID.Location = new System.Drawing.Point(12, 43);
+            this.textBoxAddID.Location = new System.Drawing.Point(12, 49);
             this.textBoxAddID.Mask = "ID-00000";
             this.textBoxAddID.Name = "textBoxAddID";
             this.textBoxAddID.PromptChar = 'X';
-            this.textBoxAddID.Size = new System.Drawing.Size(137, 20);
+            this.textBoxAddID.Size = new System.Drawing.Size(124, 20);
             this.textBoxAddID.TabIndex = 5;
             // 
             // MainForm
