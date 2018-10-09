@@ -3,16 +3,21 @@
   <user>
     <chk>true</chk>
     <id>ID-12345</id>
-    <date>06.10.2018 10:41:43</date>
+    <date>11 октября 2018 г.</date>
   </user>
   <user>
     <chk>false</chk>
     <id>ID-78777</id>
-    <date>06.10.2018 10:33:08</date>
+    <date>6 октября 2018 г.</date>
   </user>
   <user>
     <chk>false</chk>
     <id>ID-11111</id>
-    <date>06.10.2018 0:00:00</date>
+    <date>10 октября 2018 г.</date>
+  </user>
+  <user>
+    <chk>true</chk>
+    <id>ID-22222</id>
+    <date>6 октября 2018 г.</date>
   </user>
 </users>

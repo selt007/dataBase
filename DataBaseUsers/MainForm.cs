@@ -12,16 +12,16 @@ namespace DataBaseUsers
         static string pathUsers = "users", str2M3U, str1M3U;
         static int countUsers = Directory.GetFiles(pathUsers).Length - 3;
 
-        Panel[] rows = new Panel[countUsers];
-        DateTimePicker[] col3 = new DateTimePicker[countUsers];
-        Label[] col2 = new Label[countUsers];
-        CheckBox[] col1 = new CheckBox[countUsers];
+        Panel[] rows = new Panel[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Length - 3)];
+        DateTimePicker[] col3 = new DateTimePicker[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Length - 3)];
+        Label[] col2 = new Label[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Length - 3)];
+        CheckBox[] col1 = new CheckBox[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Length - 3)];
         string[] arrNameFile;
 
         public MainForm()
         {
             InitializeComponent();
-            //StartPath();
+            StartPath();
             arrNameFile = Directory.GetFiles(pathUsers);
             textBoxSearch.SetWatermark("Начните вводить ID для поиска...");
 
@@ -30,19 +30,19 @@ namespace DataBaseUsers
                 File.Create(pathUsers + "\\users.xml").Close();
                 File.WriteAllText(pathUsers + "\\users.xml", "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<users>\n</users>");
             }
-            if (!File.Exists(pathUsers + "\\2.M3U"))
+            if (!File.Exists(pathUsers + "\\2.M3U") || !File.Exists(pathUsers + "\\1.M3U"))
             {
-                File.Create(pathUsers + "\\2.M3U").Close();
-                File.WriteAllText(pathUsers + "\\2.M3U", TextBoxWatermarkExtensionMethod.m3u2);
+                MessageBox.Show("Нехватает файлов: 1.M3U и/или 2.M3U!\n" +
+                    "Для коректной работы добавьте файл(ы) и попытайтесь снова.");
+                Application.Exit();
             }
-            if (!File.Exists(pathUsers + "\\1.M3U"))
+            else
             {
-                File.Create(pathUsers + "\\1.M3U").Close();
-                File.WriteAllText(pathUsers + "\\1.M3U", TextBoxWatermarkExtensionMethod.m3u1);
+                str2M3U = File.ReadAllText($"{pathUsers}//2.M3U");
+                str1M3U = File.ReadAllText($"{pathUsers}//1.M3U");
+                LoadUsers();//DateTime.Now <= Convert.ToDateTime(xe.Element("date").Value)
+                //buttonUpdate.PerformClick();
             }
-            str2M3U = File.ReadAllText($"{pathUsers}//2.M3U");
-            str1M3U = File.ReadAllText($"{pathUsers}//1.M3U");
-            LoadUsers();//DateTime.Now <= Convert.ToDateTime(xe.Element("date").Value)
         }
 
         void StartPath()
@@ -57,33 +57,35 @@ namespace DataBaseUsers
 
         private void buttonUpdate_Click(object sender, EventArgs e)
         {
+            arrNameFile = Directory.GetFiles(pathUsers);
             XDocument xdoc = XDocument.Load(pathUsers + "\\users.xml");
             XElement root = xdoc.Element("users");
 
-            for (int i = 2; i < rows.Length; i++)
+            for (int i = 0; i < rows.Length; i++)
             {
-                string idName = arrNameFile[i].Replace(".M3U", "").Replace("users\\", "");
+                string idName = arrNameFile[i + 2].Replace(".M3U", "").Replace(pathUsers + "\\", "");
 
                 foreach (XElement xe in root.Elements("user").ToList())
                 {
-                    if (!col1[i].Checked)
+                    if (xe.Element("id").Value == col2[i].Text)
                     {
-                        File.WriteAllText(arrNameFile[i], "");
-                        File.WriteAllText(arrNameFile[i], str2M3U);
-                        if (xe.Element("id").Value == idName)
+                        xe.Element("date").Value = col3[i].Text;
+                        if (!col1[i].Checked)
                         {
                             xe.Element("chk").Value = "false";
-                            xe.Element("date").Value = col3[i].Text;
+                            File.WriteAllText(arrNameFile[i + 2], "");
+                            File.WriteAllText(arrNameFile[i + 2], str2M3U);
                         }
-                    }
-                    else
-                    {
-                        File.WriteAllText(arrNameFile[i], "");
-                        File.WriteAllText(arrNameFile[i], str1M3U);
-                        if (xe.Element("id").Value == idName)
+                        else
                         {
                             xe.Element("chk").Value = "true";
-                            xe.Element("date").Value = col3[i].Text;
+                            File.WriteAllText(arrNameFile[i + 2], "");
+                            File.WriteAllText(arrNameFile[i + 2], str1M3U);
+                        }
+                        if (DateTime.Now.Date > Convert.ToDateTime(xe.Element("date").Value))
+                        {
+                            col1[i].Checked = false;
+                            xe.Element("chk").Value = "false";
                         }
                     }
                 }
@@ -102,7 +104,13 @@ namespace DataBaseUsers
             bool chk = false;
             string date = string.Empty, ID = string.Empty;
             int i = 0;
-            
+
+            countUsers = Directory.GetFiles(pathUsers).Length - 3;
+            rows = new Panel[countUsers];
+            col3 = new DateTimePicker[countUsers];
+            col2 = new Label[countUsers];
+            col1 = new CheckBox[countUsers];
+
             XDocument xdoc = XDocument.Load(pathUsers + "\\users.xml");
             try
             {
@@ -111,6 +119,7 @@ namespace DataBaseUsers
                     XElement xChk = user.Element("chk");
                     XElement xID = user.Element("id");
                     XElement xDate = user.Element("date");
+
 
                     if (xChk.Value == "true")
                         chk = true;
@@ -186,7 +195,7 @@ namespace DataBaseUsers
                     #endregion
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("Необходим перезапуск программы для создания файлов!\n" +
                     "Вероятно, записи в файле конфигурации и файлы в папке с пользователями разнятся." +
