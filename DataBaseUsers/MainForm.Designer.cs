@@ -75,6 +75,7 @@
             // 
             // panelData
             // 
+            this.panelData.AutoScroll = true;
             this.panelData.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelData.Location = new System.Drawing.Point(12, 78);
             this.panelData.Name = "panelData";

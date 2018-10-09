@@ -10,21 +10,28 @@ namespace DataBaseUsers
     public partial class MainForm : Form
     {
         static string pathUsers = "users", str2M3U, str1M3U;
-        static int countUsers = Directory.GetFiles(pathUsers).Length - 3;
+        static string[] arrNameFile, files;
+        static int countUsers;
 
-        Panel[] rows = new Panel[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Length - 3)];
-        DateTimePicker[] col3 = new DateTimePicker[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Length - 3)];
-        Label[] col2 = new Label[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Length - 3)];
-        CheckBox[] col1 = new CheckBox[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Length - 3)];
-        string[] arrNameFile;
+        static Panel[] rows;
+        static DateTimePicker[] col3;
+        static Label[] col2;
+        static CheckBox[] col1;
 
         public MainForm()
         {
             InitializeComponent();
             StartPath();
-            arrNameFile = Directory.GetFiles(pathUsers);
-            textBoxSearch.SetWatermark("Начните вводить ID для поиска...");
 
+            files = new string[] { $"{pathUsers}\\2.M3U", $"{pathUsers}\\1.M3U", $"{pathUsers}\\users.xml" };
+            arrNameFile = Directory.GetFiles(pathUsers).Except(files).ToArray();
+            countUsers = Directory.GetFiles(pathUsers).Except(files).ToArray().Length;
+            rows = new Panel[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Except(files).ToArray().Length)];
+            col3 = new DateTimePicker[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Except(files).ToArray().Length)];
+            col2 = new Label[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Except(files).ToArray().Length)];
+            col1 = new CheckBox[(countUsers < 0 ? 0 : Directory.GetFiles(pathUsers).Except(files).ToArray().Length)];
+
+            textBoxSearch.SetWatermark("Начните вводить ID для поиска...");
             if (!File.Exists(pathUsers + "\\users.xml"))
             {
                 File.Create(pathUsers + "\\users.xml").Close();
@@ -33,15 +40,15 @@ namespace DataBaseUsers
             if (!File.Exists(pathUsers + "\\2.M3U") || !File.Exists(pathUsers + "\\1.M3U"))
             {
                 MessageBox.Show("Нехватает файлов: 1.M3U и/или 2.M3U!\n" +
-                    "Для коректной работы добавьте файл(ы) и попытайтесь снова.");
+                    "Для коректной работы добавьте файл(ы) и попытайтесь снова.", 
+                    "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 Application.Exit();
             }
             else
             {
                 str2M3U = File.ReadAllText($"{pathUsers}//2.M3U");
                 str1M3U = File.ReadAllText($"{pathUsers}//1.M3U");
-                LoadUsers();//DateTime.Now <= Convert.ToDateTime(xe.Element("date").Value)
-                //buttonUpdate.PerformClick();
+                LoadUsers();
             }
         }
 
@@ -57,46 +64,58 @@ namespace DataBaseUsers
 
         private void buttonUpdate_Click(object sender, EventArgs e)
         {
-            arrNameFile = Directory.GetFiles(pathUsers);
-            XDocument xdoc = XDocument.Load(pathUsers + "\\users.xml");
-            XElement root = xdoc.Element("users");
-
-            for (int i = 0; i < rows.Length; i++)
+            try
             {
-                string idName = arrNameFile[i + 2].Replace(".M3U", "").Replace(pathUsers + "\\", "");
+                arrNameFile = Directory.GetFiles(pathUsers).Except(files).ToArray();
+                XDocument xdoc = XDocument.Load(pathUsers + "\\users.xml");
+                XElement root = xdoc.Element("users");
 
-                foreach (XElement xe in root.Elements("user").ToList())
+                for (int i = 0; i < rows.Length; i++)
                 {
-                    if (xe.Element("id").Value == col2[i].Text)
+                    string idName = arrNameFile[i].Replace(".M3U", "").Replace(pathUsers + "\\", "");
+
+                    foreach (XElement xe in xdoc.Element("users").Elements("user"))
                     {
-                        xe.Element("date").Value = col3[i].Text;
-                        if (!col1[i].Checked)
+                        if (xe.Element("id").Value == col2[i].Text)
                         {
-                            xe.Element("chk").Value = "false";
-                            File.WriteAllText(arrNameFile[i + 2], "");
-                            File.WriteAllText(arrNameFile[i + 2], str2M3U);
-                        }
-                        else
-                        {
-                            xe.Element("chk").Value = "true";
-                            File.WriteAllText(arrNameFile[i + 2], "");
-                            File.WriteAllText(arrNameFile[i + 2], str1M3U);
-                        }
-                        if (DateTime.Now.Date > Convert.ToDateTime(xe.Element("date").Value))
-                        {
-                            col1[i].Checked = false;
-                            xe.Element("chk").Value = "false";
+                            xe.Element("date").Value = col3[i].Text;
+                            if (!col1[i].Checked)
+                            {
+                                xe.Element("chk").Value = "false";
+                                File.WriteAllText(arrNameFile[i], str2M3U);
+                            }
+                            else
+                            {
+                                xe.Element("chk").Value = "true";
+                                File.WriteAllText(arrNameFile[i], str1M3U);
+                            }
+                            if (DateTime.Now.Date > Convert.ToDateTime(xe.Element("date").Value))
+                            {
+                                col1[i].Checked = false;
+                                xe.Element("chk").Value = "false";
+                            }
                         }
                     }
+                    xdoc.Save(pathUsers + "\\users.xml");
+                    }
                 }
-                xdoc.Save(pathUsers + "\\users.xml");
+            catch(Exception ex)
+            {
+                MessageBox.Show("Дополнительная информация:\n" + ex,
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
         private void buttonAddID_Click(object sender, EventArgs e)
         {
-            AddInXml(textBoxAddID.Text);
-            LoadUsers();
+            arrNameFile = Directory.GetFiles(pathUsers).Except(files).ToArray();
+            if (!arrNameFile.Contains(pathUsers + "\\" + textBoxAddID.Text + ".M3U"))
+            {
+                AddInXml(textBoxAddID.Text);
+                LoadUsers();
+            }
+            else MessageBox.Show("Пользователь с таким ID уже есть в базе.",
+                    "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Information);            
         }
 
         void LoadUsers()
@@ -105,7 +124,7 @@ namespace DataBaseUsers
             string date = string.Empty, ID = string.Empty;
             int i = 0;
 
-            countUsers = Directory.GetFiles(pathUsers).Length - 3;
+            countUsers = Directory.GetFiles(pathUsers).Except(files).ToArray().Length;
             rows = new Panel[countUsers];
             col3 = new DateTimePicker[countUsers];
             col2 = new Label[countUsers];
@@ -119,8 +138,7 @@ namespace DataBaseUsers
                     XElement xChk = user.Element("chk");
                     XElement xID = user.Element("id");
                     XElement xDate = user.Element("date");
-
-
+                    
                     if (xChk.Value == "true")
                         chk = true;
                     else chk = false;
@@ -133,13 +151,13 @@ namespace DataBaseUsers
                         rows[i] = new Panel();
                         rows[i].Location = new System.Drawing.Point(0, i * 22);
                         rows[i].Name = "row" + i.ToString();
-                        rows[i].Size = new System.Drawing.Size(panelData.Width, 22);
+                        rows[i].Size = new System.Drawing.Size(panelData.Width - 20, 22);
                         rows[i].BorderStyle = BorderStyle.FixedSingle;
 
                         col3[i] = new DateTimePicker();
-                        col3[i].Location = new System.Drawing.Point(panelData.Width - 131, 0);
+                        col3[i].Location = new System.Drawing.Point(panelData.Width - 160, 0);
                         col3[i].Name = "3column" + i.ToString();
-                        col3[i].Size = new System.Drawing.Size(130, 28);
+                        col3[i].Size = new System.Drawing.Size(140, 28);
                         col3[i].Text = date;
 
                         col2[i] = new Label();
@@ -165,13 +183,13 @@ namespace DataBaseUsers
                         rows[i] = new Panel();
                         rows[i].Location = new System.Drawing.Point(0, i * 22);
                         rows[i].Name = "row" + i.ToString();
-                        rows[i].Size = new System.Drawing.Size(panelData.Width, 22);
+                        rows[i].Size = new System.Drawing.Size(panelData.Width - 20, 22);
                         rows[i].BorderStyle = BorderStyle.FixedSingle;
 
                         col3[i] = new DateTimePicker();
-                        col3[i].Location = new System.Drawing.Point(panelData.Width - 131, 0);
+                        col3[i].Location = new System.Drawing.Point(panelData.Width - 160, 0);
                         col3[i].Name = "3column" + i.ToString();
-                        col3[i].Size = new System.Drawing.Size(130, 28);
+                        col3[i].Size = new System.Drawing.Size(140, 28);
                         col3[i].Text = date;
 
                         col2[i] = new Label();
